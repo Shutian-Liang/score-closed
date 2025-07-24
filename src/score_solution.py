@@ -14,6 +14,7 @@ class reverse_sde:
         print(f"Using device: {self.device}")
 
         self.betas = torch.from_numpy(weights['betas']).float().to(self.device)
+        self.alphas = 1.0 - self.betas
         self.alphas_cumprod = torch.from_numpy(weights['alphas_cumprod']).float().to(self.device)
         self.sqrt_alphas_cumprod = torch.from_numpy(weights['sqrt_alphas_cumprod']).float().to(self.device)
         self.sqrt_one_minus_alphas_cumprod = torch.from_numpy(weights['sqrt_one_minus_alphas_cumprod']).float().to(self.device)
@@ -40,7 +41,7 @@ class reverse_sde:
             self.sample = self.images[img_number].clone().to(self.device)
             noise = torch.randn_like(self.sample)
             self.img = self.sqrt_alphas_cumprod[-1]*self.sample + self.sqrt_one_minus_alphas_cumprod[-1]*noise
-            self.img = self.sample + 0.5*noise  # Use the sample as the base and add noise
+            # self.img = self.sample + 0.5*noise  # Use the sample as the base and add noise
 
     def q_sample(self, x, t):
         """
@@ -84,7 +85,7 @@ class reverse_sde:
         Compute the score function at time t.
         """
         weights, xt, y, sigma = self.compute_weights(xt, t)
-        if (t%1 == 0) or (t == self.timesteps - 1):
+        if (t%100 == 0) or (t == self.timesteps - 1):
             print(f"t={t}, {weights.max(dim=1).indices}")
             
         grad = -(xt - y) / (sigma**2)
@@ -101,14 +102,15 @@ class reverse_sde:
         Sample from the reverse process at time t.
         """
         scores, xt = self.score_function(xt, t)
-        alpha_cumprod = self.alphas_cumprod[t]  
-        sqrt_alpha_cumprod = self.sqrt_alphas_cumprod[t]
+        alpha = self.alphas[t]
+        # alpha_cumprod = self.alphas_cumprod[t]  
+        # sqrt_alpha_cumprod = self.sqrt_alphas_cumprod[t]
         # posterior_sigma = self.posterior_sigmas[t]
         posterior_sigma = torch.sqrt(self.betas[t])
         
         noise = torch.randn_like(xt)
         
-        img = 1./sqrt_alpha_cumprod * (xt + (1 - alpha_cumprod) * scores) + posterior_sigma * noise
+        img = 1./torch.sqrt(alpha) * (xt + (1 - alpha) * scores) + posterior_sigma * noise
         return img
 
     def p_sample_loop(self, return_all_time_steps=True):
