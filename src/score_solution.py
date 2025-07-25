@@ -27,7 +27,7 @@ class reverse_sde:
         """
         Load data and convert it to PyTorch tensors.
         """
-        data = np.load('../data/cifar10_2k.npz')
+        data = np.load(f'./data/cifar10_{self.args.dataset}.npz')
         self.images = torch.from_numpy(data['images']).float().to(self.device)
     
     def set_sample(self):
@@ -85,8 +85,8 @@ class reverse_sde:
         Compute the score function at time t.
         """
         weights, xt, y, sigma = self.compute_weights(xt, t)
-        if (t%100 == 0) or (t == self.timesteps - 1):
-            print(f"t={t}, {weights.max(dim=1).indices}")
+        # if (t%100 == 0) or (t == self.timesteps - 1):
+        #     print(f"t={t}, {weights.max(dim=1).indices}")
             
         grad = -(xt - y) / (sigma**2)
         

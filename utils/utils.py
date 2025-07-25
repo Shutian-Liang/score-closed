@@ -10,17 +10,21 @@ def get_arguments():
     parser.add_argument('--device', type=int, default='0', help='Device to use for training')
     parser.add_argument('--batchsize', type=int, default=8, help='Batch size for training')
     
+    # dataset
+    parser.add_argument('--dataset', type=str, default='1k', choices=['1k', '2k','5k','50k'], help='Dataset to use for training')
+    
     # sde version
     # vp for ddpm and ve for smld
     parser.add_argument('--sde_version', type=str, default='vp', choices=['vp','ve'], help='Type of SDE to use')
     
     # starting point
     # sub_noise for signals, noise for gaussian noise
-    parser.add_argument('--start', type=float, default='sub_noise', choices=['sub_noise','noise'], help='Starting point for the SDE')
+    parser.add_argument('--start', type=str, default='sub_noise', choices=['sub_noise','noise'], help='Starting point for the SDE')
     
     # sampling parameters
     parser.add_argument('--timesteps', type=int, default=1000, help='Number of timesteps for the SDE')
     parser.add_argument('--temperature', type=float, default=1.0, help='Temperature for sampling')
+    parser.add_argument('--times', type=int, default=50, help='how many for loop sampling')
     
     args = parser.parse_args()
     # get arguments
