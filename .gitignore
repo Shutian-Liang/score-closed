@@ -1,6 +1,5 @@
 notebooks/test.ipynb
 src/closed_sde.py
-main.py
 data/
 logfiles/
 results/
